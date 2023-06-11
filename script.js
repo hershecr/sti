@@ -3,7 +3,7 @@ function handleSubmit(event) {
   event.preventDefault();
   const imageInput = document.getElementById('imageInput');
   const imageFile = imageInput.files[0];
-  
+
   // Perform image-to-sound conversion
   convertImageToSound(imageFile);
 }
@@ -11,38 +11,30 @@ function handleSubmit(event) {
 // Function to convert image to sound
 function convertImageToSound(imageFile) {
   const reader = new FileReader();
-  reader.onload = function(event) {
+  reader.onload = function (event) {
     const imageData = event.target.result;
-    
+
     // Send the image data to the server for processing
     fetch('/processImage', {
       method: 'POST',
       body: imageData
     })
-    .then(response => response.blob())
-    .then(audioBlob => {
-      // Create an audio player element
-      const audioPlayer = document.createElement('audio');
-      audioPlayer.controls = true;
-      
-      // Create a source element and set the audio file URL
-      const source = document.createElement('source');
-      source.src = URL.createObjectURL(audioBlob);
-      
-      // Append the source element to the audio player
-      audioPlayer.appendChild(source);
-      
-      // Append the audio player to the audioPlayer div
-      const audioPlayerContainer = document.getElementById('audioPlayer');
-      audioPlayerContainer.innerHTML = '';
-      audioPlayerContainer.appendChild(audioPlayer);
-      
-      // Play the audio
-      audioPlayer.play();
-    })
-    .catch(error => console.error(error));
+      .then(response => response.blob())
+      .then(audioBlob => {
+        // Create a download link for the audio file
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(audioBlob);
+        downloadLink.download = 'converted_audio.wav';
+        downloadLink.textContent = 'Download Converted Audio';
+
+        // Append the download link to the audioPlayer div
+        const audioPlayerContainer = document.getElementById('audioPlayer');
+        audioPlayerContainer.innerHTML = '';
+        audioPlayerContainer.appendChild(downloadLink);
+      })
+      .catch(error => console.error(error));
   };
-  
+
   // Read the image file as data URL
   reader.readAsDataURL(imageFile);
 }
